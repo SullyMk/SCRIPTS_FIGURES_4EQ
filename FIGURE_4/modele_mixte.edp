@@ -1,0 +1,294 @@
+string filename = "input/params.txt";
+string key;
+real n;
+real L = 50.0;
+int nparams = 21;
+int nfile = 3;
+
+string charac;
+
+real[int] vecval(nparams);
+string[int] datafiles(nfile);
+
+{
+ifstream file(filename);
+for(int i=0; i<nparams ; i++)
+	{
+	file>>key>>n;
+	///cout << key << " " << n << endl;
+	vecval(i) = n;
+	}
+for(int i = 0; i < nfile; i++)
+	{
+	file>> key >> charac;
+	cout << key << " " << charac << endl;
+	datafiles[i] = charac;
+	
+	}
+}
+
+
+
+// Forêt mixte
+real alpha1 = vecval(0);
+real beta1 = vecval(1);
+real delta1 = vecval(2);
+real a1 = vecval(3);
+real b1 = vecval(4);
+real c1 = vecval(5);
+real d1 = vecval(6);
+// Forêt boréale
+real alpha2 = vecval(7);
+real beta2 = vecval(8);
+real delta2 = vecval(9);
+real a2 = vecval(10);
+real b2 = vecval(11);
+real c2 = vecval(12);
+real d2 = vecval(13);
+// Time
+real tmax = vecval(14);
+real tau = vecval(15);
+real dt = tau/10;
+real dtau = dt/2;
+
+// Parameters of the extreme climatic events
+real p = vecval(16); // Probability of an extreme event
+real intensity = vecval(17); // Intensity of an extreme event
+real ree = vecval(18);;
+// coupling parameter
+real chi1 = vecval(19); // Coupling parameter between the two forests
+real chi2 = vecval(20); // Coupling parameter between the two forests
+/* Domain */
+
+mesh Th = readmesh("input/mesh.msh");
+fespace Vh(Th, P1);
+Vh u1, u2, w1new, w1old, w2new, w2old, phi1, phi2;
+
+
+ifstream Uinit(datafiles[0]);
+real xx, yy;
+for (int i = 0; i < Th.nv; i++){ 
+    Uinit >> xx >> yy >> u1[][i]  >> w1old[][i]  >> u2[][i] >> w2old[][i]; // Lire une ligne du fichier
+	}
+
+
+/* Reaction */
+
+include "functions.edp"
+
+// Simulation of a Bernoulli variable
+func int Bernoulli ( real p)
+	{
+	real DE;
+	DE = randreal1 ();
+	return (DE <p);
+	}
+
+
+func real[int] fct(real[int] X, real t)
+{
+	// X[0] -> u1
+	// X[1] -> w1
+	// X[2] -> u2
+	// X[3] -> w2
+
+	real[int] dX(4);
+	dX = 1.0;
+	// Forêt mixte
+    	dX[0] = delta1*beta1*X[1] - X[0]*(a1*(X[0]+chi1*X[2]-b1) * (X[0]+chi1*X[2]-b1) + c1);
+	dX[1] = -beta1*X[1] + alpha1*X[0];
+	// Forêt boréale
+    	dX[2] = delta2*beta2*X[3] - X[2]*(a2*(X[2]+chi2*X[0]-b2) * (X[2]+chi2*X[0]-b2) +c2);
+	dX[3] = -beta2*X[3] + alpha2*X[2];
+    	return dX;
+}
+
+/* Runge-Kutta */
+func real[int] RK4(real[int] U, real t)
+{
+	real[int] u2(4), u3(4), u4(4);
+	real[int] p1(4), p2(4), p3(4), p4(4);
+	real t2, tnew;
+	real[int] unew(4);
+	unew = 1.0;
+
+    	p1 = fct(U, t);
+    	t2 = t + 0.5*dt;
+    	u2 = U + 0.5*dt*p1;
+    	p2 = fct(u2, t2);
+    	u3 = U + 0.5*dt*p2;
+    	p3 = fct(u3, t2);
+    	tnew = t + dt;
+    	u4 = U + dt*p3;
+    	p4 = fct(u4, tnew);
+    	unew = 1.0*p1;
+	unew = unew + 2.0*p2;
+	unew = unew + 2.0*p3;
+	unew = unew + 1.0*p4;
+	unew = U + dt*1./6.*unew;
+    	return unew;
+}
+
+/* Diffusion */
+
+
+problem Diffusionw1(w1new, phi1) = int2d(Th)( w1new*phi1 + d1*dtau*(dx(w1new)* dx(phi1) + dy(w1new)* dy(phi1))) + int2d(Th) ( -w1old*phi1 );
+problem Diffusionw2(w2new, phi2) = int2d(Th)( w2new*phi2 + d2*dtau*(dx(w2new)* dx(phi2) + dy(w2new)* dy(phi2))) + int2d(Th) ( -w2old*phi2 );
+
+
+real t = 0.0;
+
+/* Initial condition */
+
+real [int] timefire;
+real [int] xfire;
+real [int] yfire;
+real [int] IKEA;
+int nlist;
+int nevent = 0; // Nombre d'événements extrêmes
+{
+ofstream dataFile(datafiles[1]); // Fichier pour stocker les données
+dataFile << "t x y u1 w1 u2 w2\n";         // En-tête
+for (int i = 0; i < Th.nv; ++i) {    // Boucle sur les sommets
+			real xx = Th(i).x;               // Coordonnée x
+			real yy = Th(i).y;               // Coordonnée y
+			dataFile << t << " " << xx << " " << yy << " " << u1[][i] << " " << w1old[][i] << " " << u2[][i] << " " << w2old[][i] <<"\n";
+			}
+			
+			
+			
+			
+for(int k = 0; k < tmax/tau; k = k + 1) {
+	for(int m = 0; m < tau/(dt+2*dtau); m = m+1)
+	{
+		// Diffusion for half-step
+		Diffusionw1;
+		Diffusionw2;
+		w1old = w1new;
+		w2old = w2new;
+		t = t + dtau;
+		
+		// Reaction for one step	
+		func real[int] reaction(real x, real y)
+			{
+				real[int] U(4);
+				U[0] = u1;
+				U[1] = w1old;
+				U[2] = u2;
+				U[3] = w2old;
+				U = RK4(U, t);
+				return U;
+			}
+
+		u1 = reaction(x, y)[0];
+		w1old = reaction(x, y)[1];
+		u2 = reaction(x, y)[2];
+		w2old = reaction(x, y)[3];
+		t = t + dt;
+
+		// Diffusion for half-step
+		Diffusionw1;
+		Diffusionw2;
+		w1old = w1new;
+		w2old = w2new;
+		t = t + dtau;
+		
+		if(m > tau/(dt+2*dtau)-2)
+			{
+			real seed = ltime();
+			randinit(seed);
+			real Xp = randres53();
+			if( Xp <= p){
+				
+			// If an extreme event occurs :
+					real xee = -1.0+2.0* randres53();			
+					real yee = -1.0+2.0* randres53();
+					xee = xee / sqrt (2);
+					yee = yee / sqrt (2);
+					xee = (L /2.0) + (L /2.0)* xee ;
+					yee = (L /2.0) + (L /2.0)* yee ;
+					
+					
+					nlist = xfire.n;
+					xfire.resize(nlist + 1);
+					xfire[nlist] = xee;
+					yfire.resize(nlist + 1);
+					yfire[nlist] = yee;
+					IKEA.resize(nlist + 1);
+					IKEA[nlist] = 1;
+			// New initial conditions
+				func real uee1( real x, real y){
+					real res ;
+					if ((x- xee )*(x- xee )+(y- yee )*(y- yee )< ree*ree ){
+						res = u1 (x, y)*(1 - intensity );
+						}
+					else {
+						res = u1 (x,y);
+						}
+					return res;
+					}
+				func real wee1( real x, real y){
+					real res ;
+					if ((x- xee )*(x- xee )+(y- yee )*(y- yee )< ree*ree ){
+						res = w1old (x, y)*(1 - intensity );
+						}
+					else {
+						res = w1old (x,y);
+						}
+					return res;
+					}
+				func real uee2( real x, real y){
+					real res ;
+					if ((x- xee )*(x- xee )+(y- yee )*(y- yee )< ree*ree ){
+						res = u2 (x, y)*(1 - intensity );
+						}
+					else {
+						res = u2 (x,y);
+						}
+					return res;
+					}
+				func real wee2( real x, real y){
+					real res ;
+					if ((x- xee )*(x- xee )+(y- yee )*(y- yee )< ree*ree ){
+						res = w2old (x, y)*(1 - intensity );
+						}
+					else {
+						res = w2old (x,y);
+						}
+					return res;
+					}
+				cout << "H event occurs" << endl ;
+				cout << "at :" << endl ;
+				cout << "x: " << xee << " y: " << yee << endl ;
+				u1 = uee1(x, y);
+				w1old = wee1(x, y);
+				u2 = uee2(x, y);
+				w2old = wee2(x, y);
+				cout << "H event occurs" << endl ;
+				cout << "at :" << endl ;
+				cout << "x: " << xee << " y: " << yee << endl ;
+				nevent = nevent + 1;
+				}else{
+			nlist = xfire.n;
+			xfire.resize(nlist + 1);
+			xfire[nlist]= -1;
+			yfire.resize(nlist + 1);
+			yfire[nlist] = -1;
+			IKEA.resize(nlist + 1);
+			IKEA[nlist] = 0;		
+				}
+			
+			nlist = timefire.n;
+			timefire.resize(nlist+1);
+			timefire[nlist] = t;
+			}
+				
+		for (int i = 0; i < Th.nv; ++i) {    // Boucle sur les sommets
+				real xx = Th(i).x;               // Coordonnée x
+				real yy = Th(i).y;               // Coordonnée y
+				dataFile << t << " " << xx << " " << yy << " " << u1[][i] << " " << w1old[][i] << " " << u2[][i] << " " << w2old[][i] <<"\n";
+				}
+		}
+}
+
+}

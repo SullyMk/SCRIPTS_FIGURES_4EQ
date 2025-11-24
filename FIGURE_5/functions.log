@@ -1,0 +1,29 @@
+   43 : // Forêt boréale
+   44 : func real u20(real x, real y, real ui)
+ *** Warning  The identifier x hide a Global identifier
+ 
+ *** Warning  The identifier y hide a Global identifier
+ 
+   45 : {
+   46 :         real res = ui;
+   47 :         res = res * exp(-((y-55)*(y-55))/300);
+   48 :         return res;
+   49 : }
+   50 :
+   51 : func real w20(real x, real y, real wi)
+ *** Warning  The identifier x hide a Global identifier
+ 
+ *** Warning  The identifier y hide a Global identifier
+ 
+   52 : {
+   53 :         real res = wi;
+   54 :         res = res * exp(-((y-55)*(y-55))/300);
+   55 :         return res;
+   56 : }
+   57 :  sizestack + 1024 =1152  ( 128 )
+ 
+times: compile 0.049s, execution 0s,  mpirank:0
+ ######## unfreed pointers   3 Nb pointer,   0Bytes  ,  mpirank 0, memory leak =0
+ CodeAlloc : nb ptr  4006,  size :532376 mpirank: 0
+Ok: Normal End
+ try getConsole C:\Users\e24h297n\Documents\TOUNDRA\Models\TOUNDRA_MIXTE\functions.edp

@@ -1,0 +1,73 @@
+
+// Taux de mortalité pour la forêt boréale
+func real fc1(real t, real x, real y, real c)
+{
+	//return 0.1*((y-3*l/4)*(y-3*l/4))/(200.0+(y-3*l/4)*(y-3*l/4));	
+	if (y>25){
+		return c;
+	}
+	else {
+		return 0.9;
+	}	
+}
+
+// Taux de mortalité pour la forêt mixte
+func real fc2(real t, real x, real y)
+{
+
+	if (y<40){
+		return 0.01;
+	}
+	else {
+		return 0.9;
+	}
+	
+}
+
+
+// Forêt mixte
+func real u10(real x, real y, real ui)
+{
+	real res = ui;
+	res = res * exp(-((y-15)*(y-15))/300);
+	return res;
+}
+
+func real w10(real x, real y, real wi)
+{
+	real res = wi;
+	res = res * exp(-((y-15)*(y-15))/300);
+	return res;
+}
+
+// Forêt boréale
+func real u20(real x, real y, real ui)
+{
+	real res = ui;
+	res = res * exp(-((y-55)*(y-55))/300);
+	return res;
+}
+
+func real w20(real x, real y, real wi)
+{
+	real res = wi;
+	res = res * exp(-((y-55)*(y-55))/300);
+	return res;
+}
+
+// competition term
+func real mu(real x, real y)
+{
+	if (y > 30)
+	{
+		return -0.05;
+	}
+	if (y < 20)
+	{
+		return 0.05;
+	}
+	else
+	{
+		return 0.0;
+	}
+}

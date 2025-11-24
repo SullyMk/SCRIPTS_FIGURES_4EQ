@@ -1,0 +1,18 @@
+// Domain Omega ( disk of radius L)
+
+func real gensquare(real L, int n){
+	mesh Th = square(n, n, [0+(L-0)*x, 0+(50-0)*y]);
+
+	savemesh(Th, "input/mesh.msh");
+
+	}
+
+func real gendisk(real L, int n){
+	border C(t=0 ,2* pi ){x=(L /2)*( cos (t ))+( L /2); y=(L /2)*( sin (t ))+( L /2);}
+	mesh Th = buildmesh (C (n));
+
+	savemesh(Th, "input/mesh.msh");
+	}
+
+
+gensquare(50, 20);

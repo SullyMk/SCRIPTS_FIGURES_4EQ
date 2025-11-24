@@ -1,0 +1,29 @@
+-- FreeFem++ v4.15 (Wed Dec 11 16:48:56 CET 2024 - git v4.15-7-gb1e524c8c)
+   file : C:\Users\e24h297n\Documents\TOUNDRA\Models\TOUNDRA_MIXTE\mesh_gen.edp
+ Load: lg_fem lg_mesh lg_mesh3 eigenvalue
+    1 : // Domain Omega ( disk of radius L)
+    2 :
+    3 : func real gensquare(real L, int n){
+    4 :         mesh Th = square(n, n, [0+(L-0)*x, 0+(50-0)*y]);
+    5 :
+    6 :         savemesh(Th, "input/mesh.msh");
+    7 :
+    8 :         }
+    9 :
+   10 : func real gendisk(real L, int n){
+   11 :         border C(t=0 ,2* pi ){x=(L /2)*( cos (t ))+( L /2); y=(L /2)*( sin (t ))+( L /2);}
+   12 :         mesh Th = buildmesh (C (n));
+   13 :
+   14 :         savemesh(Th, "input/mesh.msh");
+   15 :         }
+   16 :
+   17 :
+   18 : gensquare(50, 30); sizestack + 1024 =1472  ( 448 )
+ 
+  -- Square mesh : nb vertices  =961 ,  nb triangles = 1800 ,  nb boundary edges 120 rmdup= 0
+  number of required edges : 0
+times: compile 0.027s, execution 0.01s,  mpirank:0
+ ######## unfreed pointers   36 Nb pointer,   0Bytes  ,  mpirank 0, memory leak =0
+ CodeAlloc : nb ptr  3957,  size :530632 mpirank: 0
+Ok: Normal End
+ try getConsole C:\Users\e24h297n\Documents\TOUNDRA\Models\TOUNDRA_MIXTE\mesh_gen.edp
