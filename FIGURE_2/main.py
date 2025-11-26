@@ -17,7 +17,7 @@ import pickle as pic
 import analysis as als
 import matplotlib.pyplot as plt
 
-SIMU = 0
+SIMU = 1
 # In[] Parameters settings and simulations run 
 #%%
 params = {
@@ -92,10 +92,10 @@ else:
 
 initial_condition = inip.regions_noise
 arg = [
-       [0, 50, 25, 50, u1_0, u1_0*0.1], 
-       [0, 50, 25, 50, w1_0, w1_0*0.1],
-       [0, 50, 0, 25, u2_0, u2_0*0.1],
-       [0, 50, 0, 25, w2_0, w2_0*0.1]
+       [0, 50, 0, 50, u1_0, u1_0*0.1], 
+       [0, 50, 0, 50, w1_0, w1_0*0.1],
+       [0, 50, 0, 50, u2_0, u2_0*0.1],
+       [0, 50, 0, 50, w2_0, w2_0*0.1]
        ]
 
 U0 = model.gen_CI(inip.regions_noise, arg)

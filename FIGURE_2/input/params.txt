@@ -14,11 +14,11 @@ c2 0.01
 d2 50
 tmax 200
 tau 1
-p 0
-I 0
+p 0.9
+I 0.9
 ree 10
 chi1 0.1
 chi2 0.1
 U0 input/U0.txt
-U output/solution_no_fire.txt
+U output/solution_with_firepI0.9n0.9.txt
 F output/fire.txt
