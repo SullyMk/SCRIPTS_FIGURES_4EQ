@@ -14,8 +14,8 @@ c2 0.03
 d2 1
 tmax 50
 tau 1
-p 0
-I 0.9
+p 0.8
+I 0.8
 ree 2
 chi1 0.05
 chi2 0.05

@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct  8 15:25:44 2025
-
-@author: e24h297n
-"""
-
 """
 Created on Mon Dec 16 13:48:09 2024
 
@@ -16,8 +9,6 @@ import initialpy as inip
 import analysis as als
 import numpy as np
 # In[] Parameters settings and simulations run 
-
-SIMU = 0
 
 params = {
     "alpha1": 1,
@@ -36,8 +27,8 @@ params = {
     "d2": 1,
     "tmax": 50,
     "tau": 1,
-    "p": 0,
-    "I": 0.9,
+    "p": 0.8,
+    "I": 0.8,
     "ree":2,
     "chi1":0.05,
     "chi2":0.05,
@@ -49,7 +40,7 @@ filename = params["U"]
 for key, value in params.items():
     globals()[key] = value
 
-
+SIMU = 0
 
 A = 2*(a1*b1+a2*b2)
 rho = a1+ a2 
@@ -90,19 +81,19 @@ arg = [
        ]
 
 arg = [
-       [1.15, epsilon],
-       [(alpha1/beta1)*1.15,epsilon, ],
-       [1.75, epsilon],
-       [(alpha2/beta2)*(1.75), epsilon]
+       [0.95, epsilon],
+       [(alpha1/beta1)*0.95,epsilon, ],
+       [1.975, epsilon],
+       [(alpha2/beta2)*(1.975), epsilon]
        ]
 
 
 
 if SIMU == 1:
-    U0 = model.gen_CI(initial_condition, arg)
-    DF, T = model.sim_PDE(params, script_name = "modele_mixte_mu.edp")
+    DF, T = model.sim_PDE(params)
 
-DF, T = read.solution("output/solution_test_with_fire_Pless.txt")
+
+DF, T = read.solution(params["U"])
 
 
 
