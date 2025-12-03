@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import simpson
 from scipy.interpolate import griddata
 import pickle as pic
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid
 
 
 def l2_norm(u, dx, dy):
@@ -36,8 +36,8 @@ def J(val, T, Norm):
     return J
 
 def int_trpz(u, x, y):
-    integral_x = trapz(u, x[0,:])     # Intégration selon x pour chaque ligne y
-    I = trapz(integral_x, y[:,0])      # Puis intégration du résultat selon y
+    integral_x = trapezoid(u, x[0,:])     # Intégration selon x pour chaque ligne y
+    I = trapezoid(integral_x, y[:,0])      # Puis intégration du résultat selon y
     return I
 
 import model
@@ -146,7 +146,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.integrate import simpson
 from scipy.interpolate import griddata
-import cma
 import pickle as pic
 
 
